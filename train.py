@@ -35,7 +35,7 @@ print('missing values:', train.isnull().sum())
 f,axes=plt.subplots(1,3,figsize=(16,5))
 sns.countplot(x='bank_account',hue='country',data=train,palette='magma',ax=axes[0]).set_title('People with bank account per country',fontsize=(13))
 sns.countplot(x='bank_account',data=train,ax=axes[1]).set_title('People with bank account',fontsize=(13))
-sns.countplot(x='bank_account',hue='location_type', data=train,palette='magma', ax=axes[2]).set_title('People without (0) vs. with (1) bank account per location type',fontsize=(13))
+sns.countplot(x='bank_account',hue='location_type', data=train,palette='magma', ax=axes[2]).set_title('People without [0] vs. with [1] bank account per location type',fontsize=(13))
 plt.show()
 
 # Define predictors and target
