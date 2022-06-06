@@ -63,19 +63,40 @@ train.describe()
 print('missing values:', train.isnull())
 print('missing values:', train.isnull().sum())
 
+plotfontsize = 10
+
 # Explore Target distribution 
 #sns.catplot(x="country", y="bank_account", kind="count",  data=train)
 
 ## number of people with bank account per country
 f,axes=plt.subplots(1,3,figsize=(16,5))
-sns.countplot(x='bank_account',hue='country',data=train,palette='magma',ax=axes[0]).set_title('People with bank account per country',fontsize=(13))
-sns.countplot(x='bank_account',data=train,ax=axes[1]).set_title('People with bank account',fontsize=(13))
-sns.countplot(x='bank_account',hue='location_type', data=train,palette='magma', ax=axes[2]).set_title('People without [0] vs. with [1] bank account per location type',fontsize=(13))
+sns.countplot(x='bank_account',hue='country',data=train,palette='magma',ax=axes[0]).set_title('People with bank account per country',fontsize=(plotfontsize))
+sns.countplot(x='bank_account',data=train,ax=axes[1]).set_title('People with bank account',fontsize=(plotfontsize))
+sns.countplot(x='bank_account',hue='location_type', data=train,palette='magma', ax=axes[2]).set_title('People without [0] vs. with [1] bank account per location type',fontsize=(plotfontsize))
 plt.show()
 
-# Define predictors and target
-y = train.bank_account
-X = train.drop('bank_account', axis=1)
+## finding correlation 
+data_corr=train.copy()
+data_corr.drop('uniqueid',inplace=True,axis=1)
+
+ll=LabelEncoder()
+data_corr['country']=ll.fit_transform(data_corr['country'])
+data_corr['bank_account']=ll.fit_transform(data_corr['bank_account'])
+data_corr['location_type']=ll.fit_transform(data_corr['location_type'])
+data_corr['cellphone_access']=ll.fit_transform(data_corr['cellphone_access'])
+data_corr['gender_of_respondent']=ll.fit_transform(data_corr['gender_of_respondent'])
+data_corr['relationship_with_head'] = ll.fit_transform(data_corr['relationship_with_head'])
+data_corr['marital_status']=ll.fit_transform(data_corr['marital_status'])
+data_corr['education_level']=ll.fit_transform(data_corr['education_level'])
+#data_corr['job_type']=ll.fit_transform(data_corr['job_type'])
+### correlation
+sns.set_style('dark')
+f,axes=plt.subplots(1,1,figsize=(15,6))
+sns.heatmap(data_corr.corr(),vmin=0,vmax=1,annot=True)
+plt.show()
+
+y = train.bank_account  # Define target
+X = train.drop('bank_account', axis=1)  # Define predictors 
 
 # Train-test-split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -119,3 +140,5 @@ sns.heatmap(cm, cmap="YlGnBu", annot=True, fmt='d');
 
 # Print classification report for more information
 print(classification_report(y_test, y_pred_lg))
+
+plt.show()
