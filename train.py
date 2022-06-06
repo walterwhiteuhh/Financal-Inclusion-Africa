@@ -9,10 +9,45 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import confusion_matrix, classification_report
 #from google.colab import files
 import warnings
 warnings.filterwarnings('ignore')
+
+# function to preprocess our data from train models
+
+enc = LabelEncoder()
+
+def preprocessing_data(df):
+    # convert categorical features to numerical features
+    # # checking categorical columns
+    categorical_columns = df.select_dtypes(include = 'object')
+    categorical_columns
+
+    # categorical features to be converted by One Hot Encoding
+    categ =  ["relationship_with_head", "marital_status", "education_level", "job_type", "country"]
+    # One Hot Encoding conversion
+    df = pd.get_dummies(df, prefix_sep='_', columns = categ)
+
+    # Labelncoder conversion
+    # #for i in categ:
+    # df[i] = enc.fit_transform(df[i])
+    df['location_type'] = enc.fit_transform(df['location_type'])
+    df['cellphone_access'] = enc.fit_transform(df['cellphone_access'])
+    df['gender_of_respondent'] = enc.fit_transform(df['gender_of_respondent'])    
+    
+    # drop uniquid column
+    df = df.drop(["uniqueid"], axis=1)
+    
+    # scale our data into range of 0 and 1
+    scaler = MinMaxScaler(feature_range=(0, 1))
+    df = scaler.fit_transform(df)
+    
+    return df                  
+
+
+# später auch test_end Set!
 
 # Load files into a pandas dataframe
 train = pd.read_csv('data/Train.csv')
