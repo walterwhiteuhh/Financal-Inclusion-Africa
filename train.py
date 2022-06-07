@@ -46,8 +46,8 @@ def preprocessing_data(df):
     
     return df                  
 
-
 # später auch test_end Set!
+
 
 # Load files into a pandas dataframe
 train = pd.read_csv('data/Train.csv')
@@ -119,12 +119,20 @@ for i in categorical_columns:
     print(i)
     X_train[i] = enc.fit_transform(X_train[i])
     X_test[i] = enc.fit_transform(X_test[i])
+    y_train = enc.fit_transform(y_train)
+    y_test = enc.fit_transform(y_test)
 
 train_visual.head()
 
 # checking categorical columns
 categorical_columns = train.select_dtypes(include = 'object')
 categorical_columns
+
+# Defining baseline model location_type / Urban = 1 Rural = 0
+
+def baseline_model(X_train):
+    y_pred_baseline = [1 if x == 1 else 0 for x in X_train.location_type]
+    return y_pred_baseline
 
 # create Logistic Regression Model
 lg_model = LogisticRegression()
@@ -133,12 +141,18 @@ lg_model = LogisticRegression()
 lg_model.fit(X_train, y_train)
 
 # Make predictions for test set
+y_pred_baseline = baseline_model(X_test)
 y_pred_lg = lg_model.predict(X_test)
-# print confusion matrix
+
+# print confusion matrix baseline-model
+cm = confusion_matrix(y_test, y_pred_baseline)
+sns.heatmap(cm, cmap="YlGnBu", annot=True, fmt='d');
+# print confusion matrix lg-model
 cm = confusion_matrix(y_test, y_pred_lg)
 sns.heatmap(cm, cmap="YlGnBu", annot=True, fmt='d');
 
 # Print classification report for more information
+print(classification_report(y_test, y_pred_baseline))
 print(classification_report(y_test, y_pred_lg))
 
 plt.show()
