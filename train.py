@@ -6,7 +6,9 @@ import matplotlib.pyplot as plt
 
 # machine learning
 #from lightgbm import LGBMClassifier
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_val_score, train_test_split, GridSearchCV
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import mean_squared_error as mse
 from sklearn.metrics import accuracy_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder
@@ -46,8 +48,8 @@ def preprocessing_data(df):
     
     return df                  
 
-
 # später auch test_end Set!
+
 
 # Load files into a pandas dataframe
 train = pd.read_csv('data/Train.csv')
@@ -119,12 +121,20 @@ for i in categorical_columns:
     print(i)
     X_train[i] = enc.fit_transform(X_train[i])
     X_test[i] = enc.fit_transform(X_test[i])
+    y_train = enc.fit_transform(y_train)
+    y_test = enc.fit_transform(y_test)
 
 train_visual.head()
 
 # checking categorical columns
 categorical_columns = train.select_dtypes(include = 'object')
 categorical_columns
+
+# Defining baseline model location_type / Urban = 1 Rural = 0
+
+def baseline_model(X_train):
+    y_pred_baseline = [1 if x == 1 else 0 for x in X_train.location_type]
+    return y_pred_baseline
 
 # create Logistic Regression Model
 lg_model = LogisticRegression()
@@ -133,12 +143,89 @@ lg_model = LogisticRegression()
 lg_model.fit(X_train, y_train)
 
 # Make predictions for test set
+y_pred_baseline = baseline_model(X_test)
 y_pred_lg = lg_model.predict(X_test)
-# print confusion matrix
-cm = confusion_matrix(y_test, y_pred_lg)
-sns.heatmap(cm, cmap="YlGnBu", annot=True, fmt='d');
+
+# print confusion matrix baseline-model
+cm_baseline = confusion_matrix(y_test, y_pred_baseline)
+sns.heatmap(cm_baseline, cmap="YlGnBu", annot=True, fmt='d');
+# print confusion matrix lg-model
+cm_lg_model = confusion_matrix(y_test, y_pred_lg)
+sns.heatmap(cm_lg_model, cmap="YlGnBu", annot=True, fmt='d');
 
 # Print classification report for more information
+print(classification_report(y_test, y_pred_baseline))
 print(classification_report(y_test, y_pred_lg))
 
 plt.show()
+
+#rescale X_train and X_test with MinMaxScaler
+
+scaler = MinMaxScaler(feature_range=(0, 1))
+X_train_rescaled = scaler.fit_transform(X_train)
+X_test_rescaled = scaler.fit_transform(X_test)
+
+# Instantiate model and fit it on rescaled train data
+lg_model.fit(X_train_rescaled, y_train)
+
+# Make predictions for test set
+y_pred_lg_rescaled = lg_model.predict(X_test_rescaled)
+
+# print confusion matrix lg-model rescaled train data
+cm_lg_rescaled = confusion_matrix(y_test, y_pred_lg_rescaled)
+sns.heatmap(cm_lg_rescaled, cmap="YlGnBu", annot=True, fmt='d');
+
+# Print classification report for more information on lg_model with rescaled data
+print(classification_report(y_test, y_pred_lg_rescaled))
+
+# my model 1: RandomForestClassifier
+my_model_1 = RandomForestClassifier(n_estimators=100, random_state= 20, n_jobs = 2)
+# my_model_1.score()
+
+# Instantiate model and fit it on train data
+my_model_1.fit(X_train, y_train)
+
+# Make predictions for test set
+y_pred_my_model_1 = my_model_1.predict(X_test)
+
+# print confusion matrix my_model_1 on train data
+cm_my_model_1 = confusion_matrix(y_test, y_pred_my_model_1)
+sns.heatmap(cm_my_model_1, cmap="YlGnBu", annot=True, fmt='d');
+
+# Print classification report for my_model_1 on test data
+print(classification_report(y_test, y_pred_my_model_1))
+
+# My Model 2: Optimize model paramaters via Grid Search
+# I run this code in google colab to make the execution much faster and use the best params in the next code
+param_grid = {#'class_weight': [2, 5, 10],
+           # 'gamma': [0.5, 1, 1.5, 2, 5],
+            'max_samples': [1, 10, 100],
+           # 'colsample_bytree': [0.6, 0.8, 1.0],
+            'max_depth': [5, 10, 100],
+            'verbose': [1, 5, 10]
+            }
+
+my_model_2 = GridSearchCV(my_model_1, param_grid)
+
+# Instantiate model and fit it on train data
+my_model_2.fit(X_train, y_train)
+print(my_model_2.best_params_)
+
+# Make predictions for test set
+y_pred_my_model_2 = my_model_2.predict(X_test)
+
+# print confusion matrix my_model_1 on train data
+cm_my_model_2 = confusion_matrix(y_test, y_pred_my_model_2)
+sns.heatmap(cm_my_model_2, cmap="YlGnBu", annot=True, fmt='d');
+
+# Print classification report for my_model_2 on test data
+print(classification_report(y_test, y_pred_my_model_2))
+
+# Print again classification report for my_model_1 on test data
+print(classification_report(y_test, y_pred_my_model_1))
+
+# Print again classification report for lg_model
+print(classification_report(y_test, y_pred_lg))
+
+plt.show()
+
