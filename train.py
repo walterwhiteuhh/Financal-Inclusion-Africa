@@ -1,3 +1,4 @@
+from cgi import test
 import pandas as pd
 import numpy as np
 import seaborn as sns
@@ -105,11 +106,15 @@ y_pred_baseline = baseline_model(X_test)
 y_pred_lg = lg_model.predict(X_test)
 
 # print confusion matrix of baseline-model
+sns.set_style('dark')
+f,axes=plt.subplots(1,1,figsize=(15,6))
 cm_baseline = confusion_matrix(y_test, y_pred_baseline)
 sns.heatmap(cm_baseline, cmap="YlGnBu", annot=True, fmt='d');
 plt.savefig("confusion_matrix_baseline_model.pdf")
 
 # print confusion matrix lg-model
+sns.set_style('dark')
+f,axes=plt.subplots(1,1,figsize=(15,6))
 cm_lg_model = confusion_matrix(y_test, y_pred_lg)
 sns.heatmap(cm_lg_model, cmap="YlGnBu", annot=True, fmt='d');
 plt.savefig("confusion_matrix_lg_model.pdf")
@@ -128,6 +133,8 @@ my_model_1.fit(X_train, y_train)
 y_pred_my_model_1 = my_model_1.predict(X_test)
 
 # print confusion matrix of Model 1: Random Forest on train data
+sns.set_style('dark')
+f,axes=plt.subplots(1,1,figsize=(15,6))
 cm_my_model_1 = confusion_matrix(y_test, y_pred_my_model_1)
 sns.heatmap(cm_my_model_1, cmap="YlGnBu", annot=True, fmt='d');
 plt.savefig("confusion_matrix_model_1.pdf")
@@ -154,6 +161,8 @@ print(my_model_2.best_params_)
 y_pred_my_model_2 = my_model_2.predict(X_test)
 
 # print confusion matrix of Model 2 as Optimized Model 1 with Grid Search
+sns.set_style('dark')
+f,axes=plt.subplots(1,1,figsize=(15,6))
 cm_my_model_2 = confusion_matrix(y_test, y_pred_my_model_2)
 sns.heatmap(cm_my_model_2, cmap="YlGnBu", annot=True, fmt='d');
 plt.savefig("confusion_matrix_model_2.pdf")
@@ -179,3 +188,49 @@ print("Precision of Model 2: Optimized Model 1: {}".format(precision_score(y_tes
 # }
 
 # f, axes = plt.subplots(1, 4, figsize=(20, 5), sharey='row')
+
+# Plot the relation of actual vs. predicted values in the lg_model
+#sns.set_style('dark')
+#f,axes=plt.subplots(1,1,figsize=(15,6))
+#sns.residplot(x=y_test, y=y_pred_lg, data=X_test)
+#sns.regplot(x=y_test, y=y_pred_lg, data=X_test)
+#plt.savefig("residplot_lg_model.pdf")
+
+# Errors of lg_model
+# get table with data points, truth, and pred
+errors = X_test.copy()
+errors['truth'] = y_test
+errors['pred'] = y_pred_lg
+errors = errors[errors['truth'] != errors['pred']]
+
+print(errors.shape[0], 'errors over',y_pred_lg.shape[0],'predictions')
+
+print(errors.head())
+print(errors.describe())
+
+# confusion matrix to visualize where our errors are coming from.
+sns.set_style('dark')
+f,axes=plt.subplots(1,1,figsize=(15,6))
+cm_errors_lg_model = confusion_matrix(errors['truth'], errors['pred'])
+sns.heatmap(cm_errors_lg_model, cmap="YlGnBu", annot=True, fmt='d');
+plt.savefig("confusion_matrix_errors_lg_model.pdf")
+
+# Errors of Model 2:
+# get table with data points, truth, and pred
+errors_2 = X_test.copy()
+errors_2['truth'] = y_test
+errors_2['pred'] = y_pred_my_model_2
+errors_2 = errors_2[errors_2['truth'] != errors_2['pred']]
+
+print(errors_2.shape[0], 'errors over',y_pred_my_model_2.shape[0],'predictions')
+
+print(errors_2.head())
+print(errors_2.describe())
+
+# confusion matrix to visualize the errors of Model 2
+sns.set_style('dark')
+f,axes=plt.subplots(1,1,figsize=(15,6))
+cm_errors_model_2 = confusion_matrix(errors_2['truth'], errors_2['pred'])
+sns.heatmap(cm_errors_model_2, cmap="YlGnBu", annot=True, fmt='d');
+plt.savefig("confusion_matrix_errors_model_2.pdf")
+
