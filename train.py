@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import cross_val_score, train_test_split, GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import mean_squared_error as mse
+from sklearn.metrics import log_loss
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder
@@ -197,7 +198,7 @@ print("Precision of Model 2: Optimized Model 1: {}".format(precision_score(y_tes
 #plt.savefig("residplot_lg_model.pdf")
 
 # Errors of lg_model
-# get table with data points, truth, and pred
+# get table with data points, actual ('truth') and predicted ('pred') values
 errors = X_test.copy()
 errors['truth'] = y_test
 errors['pred'] = y_pred_lg
@@ -234,3 +235,18 @@ cm_errors_model_2 = confusion_matrix(errors_2['truth'], errors_2['pred'])
 sns.heatmap(cm_errors_model_2, cmap="YlGnBu", annot=True, fmt='d');
 plt.savefig("confusion_matrix_errors_model_2.pdf")
 
+# print root mean squared error of lg-model
+rmse_lg_model = mse(y_test, y_pred_lg, squared=False)
+print("The root mean squared error of the lg-model is", rmse_lg_model)
+
+# print mean squared error of optimized Model 2:
+rmse_my_model_2 = mse(y_test, y_pred_my_model_2, squared=False)
+print("The root mean squared error of my model 2 is", rmse_my_model_2)
+
+# print log_loss of lg-model
+log_loss_lg_model = log_loss(y_test, y_pred_lg)
+print("The log loss error of the lg-model is", log_loss_lg_model)
+
+# print log_loss of optimized Model 2:
+log_loss_my_model_2 = log_loss(y_test, y_pred_my_model_2)
+print("The root mean squared error of my model 2 is", log_loss_my_model_2)
