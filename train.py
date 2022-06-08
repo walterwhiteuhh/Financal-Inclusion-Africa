@@ -206,10 +206,13 @@ errors = errors[errors['truth'] != errors['pred']]
 
 print(errors.shape[0], 'errors over',y_pred_lg.shape[0],'predictions')
 
-print(errors.head())
-print(errors.describe())
+# Get error rate
+print("Error rate of Logistic Regression classifier: ", 1 - accuracy_score(y_test, y_pred_lg))
 
-# confusion matrix to visualize where our errors are coming from.
+print(errors.head())
+#print(errors.describe())
+
+# Print confusion matrix to visualize where our errors are coming from.
 sns.set_style('dark')
 f,axes=plt.subplots(1,1,figsize=(15,6))
 cm_errors_lg_model = confusion_matrix(errors['truth'], errors['pred'])
@@ -225,8 +228,11 @@ errors_2 = errors_2[errors_2['truth'] != errors_2['pred']]
 
 print(errors_2.shape[0], 'errors over',y_pred_my_model_2.shape[0],'predictions')
 
+# Get error rate
+print("Error rate of Model 2 classifier: ", 1 - accuracy_score(y_test, y_pred_my_model_2))
+
 print(errors_2.head())
-print(errors_2.describe())
+#print(errors_2.describe())
 
 # confusion matrix to visualize the errors of Model 2
 sns.set_style('dark')
